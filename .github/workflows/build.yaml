@@ -50,8 +50,6 @@ jobs:
           pattern: build-*
           merge-multiple: true
 
-      - run: find . -type f
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
