@@ -2,13 +2,14 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	Meta struct {
-		FetchInterval int `mapstructure:"fetch_interval"`
+		FetchInterval time.Duration `mapstructure:"fetch_interval"`
 	} `mapstructure:"meta"`
 
 	Paths struct {

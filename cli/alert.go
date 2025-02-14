@@ -38,7 +38,7 @@ func Alert() *cobra.Command {
 			}
 
 			// Check programs loop
-			ticker := time.NewTicker(time.Duration(config.Meta.FetchInterval))
+			ticker := time.NewTicker(config.Meta.FetchInterval * time.Second)
 			defer ticker.Stop()
 
 			for {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/shinosaki/namagent/internal/alert/types"
@@ -11,6 +12,8 @@ import (
 )
 
 func FetchRecentPrograms(isBulkFetch bool, client *http.Client) ([]types.RecentProgram, error) {
+	log.Println("fetch recent programs")
+
 	if client == nil {
 		client = utils.NewHttp2Client()
 	}
