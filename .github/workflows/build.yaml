@@ -55,8 +55,7 @@ jobs:
         with:
           files: dist/*
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: build with actions
+          name: ${{ github.ref_name }}
           draft: false
           prerelease: false
         env:
