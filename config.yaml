@@ -1,0 +1,12 @@
+meta:
+  fetch_interval: 10
+
+paths:
+  ffmpeg: "ffmpeg"
+  output_base_dir: "."
+
+following:
+  users:
+    nico:
+      - "5599432"
+      - "96462240"
