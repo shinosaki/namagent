@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/shinosaki/namagent/internal/alert/types"
+	"github.com/shinosaki/namagent/internal/config"
 	"github.com/shinosaki/namagent/internal/recorder"
 	"github.com/shinosaki/namagent/utils"
 )
@@ -16,9 +17,13 @@ import (
 func Alert(
 	sc *utils.SignalContext,
 	programs []types.RecentProgram,
-	followingUsers []string,
-	ffmpegPath string,
+	config config.Config,
 ) {
+	var (
+		ffmpegPath     = config.Paths.FFmpeg
+		followingUsers = config.Following.Users["nico"]
+	)
+
 	for _, program := range programs {
 		if slices.Contains(followingUsers, program.ProgramProvider.Id) {
 			// show information
@@ -41,6 +46,7 @@ func Alert(
 
 				outputPath, err := filepath.Abs(
 					filepath.Join(
+						config.Paths.OutputBaseDir,
 						program.ProgramProvider.Id,
 						fmt.Sprintf("%s-%s-%s-%s.%s",
 							time.Now().Format("20060102"),

@@ -34,7 +34,7 @@ func Alert() *cobra.Command {
 			if programs, err := alert.FetchRecentPrograms(true, client); err != nil {
 				return err
 			} else {
-				alert.Alert(sc, programs, config.Following.Users["nico"], config.Paths.FFmpeg)
+				alert.Alert(sc, programs, config)
 			}
 
 			// Check programs loop
@@ -51,7 +51,7 @@ func Alert() *cobra.Command {
 					if programs, err := alert.FetchRecentPrograms(false, client); err != nil {
 						return err
 					} else {
-						alert.Alert(sc, programs, config.Following.Users["nico"], config.Paths.FFmpeg)
+						alert.Alert(sc, programs, config)
 					}
 				}
 			}
