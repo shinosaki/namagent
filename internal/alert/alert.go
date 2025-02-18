@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"slices"
-	"syscall"
 	"time"
 
 	"github.com/shinosaki/namagent/internal/consts"
@@ -49,9 +48,7 @@ func Alert(
 
 				// nico.Client(program.Id, client, sc)
 				proc := exec.Command(os.Args[0], "recorder", program.Id)
-				proc.SysProcAttr = &syscall.SysProcAttr{
-					Setsid: true,
-				}
+				utils.SetSID(proc)
 
 				if err := proc.Run(); err != nil {
 					log.Printf("Alert: %s recorder is failed %s", program.Id, err)
