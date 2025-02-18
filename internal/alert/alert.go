@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime"
 	"slices"
 	"syscall"
 	"time"
@@ -49,8 +50,10 @@ func Alert(
 
 				// nico.Client(program.Id, client, sc)
 				proc := exec.Command(os.Args[0], "recorder", program.Id)
-				proc.SysProcAttr = &syscall.SysProcAttr{
-					Setsid: true,
+				if runtime.GOOS != "windows" {
+					proc.SysProcAttr = &syscall.SysProcAttr{
+						Setsid: true,
+					}
 				}
 
 				if err := proc.Run(); err != nil {
