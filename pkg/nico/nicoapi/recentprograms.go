@@ -1,4 +1,4 @@
-package alert
+package nicoapi
 
 import (
 	"encoding/json"
@@ -7,11 +7,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/shinosaki/namagent/internal/alert/types"
-	"github.com/shinosaki/namagent/utils"
+	"github.com/shinosaki/namagent/internal/utils"
 )
 
-func FetchRecentPrograms(isBulkFetch bool, client *http.Client) ([]types.RecentProgram, error) {
+func FetchRecentPrograms(isBulkFetch bool, client *http.Client) ([]RecentProgram, error) {
 	log.Println("fetch recent programs")
 
 	if client == nil {
@@ -24,7 +23,7 @@ func FetchRecentPrograms(isBulkFetch bool, client *http.Client) ([]types.RecentP
 
 	var (
 		offset          = 0
-		result          []types.RecentProgram
+		result          []RecentProgram
 		MAX_DATA_LENGTH = 70 // Max length of recent programs endpoint
 	)
 	for {
@@ -42,7 +41,7 @@ func FetchRecentPrograms(isBulkFetch bool, client *http.Client) ([]types.RecentP
 	}
 }
 
-func recentPrograms(offset int, client *http.Client) ([]types.RecentProgram, error) {
+func recentPrograms(offset int, client *http.Client) ([]RecentProgram, error) {
 	var (
 		endpoint = "https://live.nicovideo.jp/front/api/pages/recent/v1/programs"
 		params   = fmt.Sprintf("?offset=%d&sortOrder=recentDesc", offset)
@@ -64,7 +63,7 @@ func recentPrograms(offset int, client *http.Client) ([]types.RecentProgram, err
 		return nil, err
 	}
 
-	var data types.APIResponse
+	var data APIResponse
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, err
 	}
@@ -73,7 +72,7 @@ func recentPrograms(offset int, client *http.Client) ([]types.RecentProgram, err
 		return nil, fmt.Errorf("%s", data.Meta.ErrorCode)
 	}
 
-	var result []types.RecentProgram
+	var result []RecentProgram
 	if err := json.Unmarshal(data.Data, &result); err != nil {
 		return nil, err
 	}

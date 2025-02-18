@@ -4,9 +4,11 @@ go 1.23.6
 
 require (
 	github.com/gorilla/websocket v1.5.3
+	github.com/shinosaki/nicolive-comment-protobuf v0.0.0-20250217013734-9cb69266505f
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	golang.org/x/net v0.35.0
+	google.golang.org/protobuf v1.36.5
 )
 
 require (

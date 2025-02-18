@@ -1,72 +1,89 @@
 package alert
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"path/filepath"
+	"net/http"
+	"os"
+	"os/exec"
 	"slices"
+	"syscall"
 	"time"
 
-	"github.com/shinosaki/namagent/internal/alert/types"
-	"github.com/shinosaki/namagent/internal/config"
-	"github.com/shinosaki/namagent/internal/recorder"
-	"github.com/shinosaki/namagent/utils"
+	"github.com/shinosaki/namagent/internal/consts"
+	"github.com/shinosaki/namagent/internal/utils"
+	"github.com/shinosaki/namagent/pkg/nico/nicoapi"
 )
 
 func Alert(
+	client *http.Client,
 	sc *utils.SignalContext,
-	programs []types.RecentProgram,
-	config config.Config,
 ) {
-	var (
-		ffmpegPath     = config.Paths.FFmpeg
-		followingUsers = config.Following.Users["nico"]
-	)
+	if client == nil {
+		client = utils.NewHttp2Client()
+	}
 
-	for _, program := range programs {
-		if slices.Contains(followingUsers, program.ProgramProvider.Id) {
-			// show information
-			log.Printf("Live stream detected for followed user: %s (%s)",
-				program.ProgramProvider.Id,
-				program.ProgramProvider.Name,
-			)
+	config, _ := sc.GetValue(consts.CONFIG).(*utils.Config)
 
-			// active recording state management
-			if sc.IsActiveTask(program.Id) {
-				log.Println("This program is already recording:", program.Id)
+	ticker := time.NewTicker(config.Alert.CheckIntervalSec * time.Second)
+	defer ticker.Stop()
+
+	checkPrograms := func(programs []nicoapi.RecentProgram) {
+		for _, program := range programs {
+			userId := program.ProgramProvider.Id
+			userName := program.ProgramProvider.Name
+
+			// If not followed
+			if !slices.Contains(config.Following.Nico, userId) {
 				continue
 			}
 
-			_, cancel := context.WithCancel(sc.Context())
-			sc.AddTask(program.Id, cancel)
+			// If recorded
+			if sc.IsActiveTask(program.Id) {
+				continue
+			}
 
+			log.Println("Alert: detected live stream for user id", userId, userName)
 			go func() {
+				sc.AddTask(program.Id, func() {})
 				defer sc.CancelTask(program.Id)
 
-				outputPath, err := filepath.Abs(
-					filepath.Join(
-						config.Paths.OutputBaseDir,
-						program.ProgramProvider.Id,
-						fmt.Sprintf("%s-%s-%s-%s.%s",
-							time.Now().Format("20060102"),
-							program.Id,
-							program.ProgramProvider.Name,
-							program.Title,
-							"ts",
-						),
-					),
-				)
-				if err != nil {
-					log.Println(err)
-					return
+				// nico.Client(program.Id, client, sc)
+				proc := exec.Command(os.Args[0], "recorder", program.Id)
+				proc.SysProcAttr = &syscall.SysProcAttr{
+					Setsid: true,
 				}
 
-				log.Println("Output Path:", outputPath)
-
-				// run recorder
-				recorder.Recorder(sc, nil, program.Id, ffmpegPath, outputPath)
+				if err := proc.Run(); err != nil {
+					log.Printf("Alert: %s recorder is failed %s", program.Id, err)
+				}
 			}()
+		}
+	}
+
+	fetchPrograms := func(isBulkFetch bool) {
+		log.Println("Alert: fetch recent programs...")
+		programs, err := nicoapi.FetchRecentPrograms(isBulkFetch, client)
+		if err != nil {
+			log.Println("Alert: recent programs fetch failed", err)
+			return
+		}
+
+		log.Printf("Alert: check %d programs", len(programs))
+		checkPrograms(programs)
+	}
+
+	// bulk fetch in first time
+	fetchPrograms(true)
+
+	// monitoring forever
+	for {
+		select {
+		case <-sc.Context().Done():
+			log.Println("Alert: receive interrupt...")
+			// sc.Wait()
+			return
+		case <-ticker.C:
+			fetchPrograms(false)
 		}
 	}
 }

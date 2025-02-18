@@ -1,12 +1,10 @@
-meta:
-  fetch_interval: 10
+# alert:
+#   check_interval_sec: 10
 
-paths:
-  ffmpeg: "ffmpeg"
-  output_base_dir: "."
+# recorder:
+#   output_template:
+#   command_template:
 
 following:
-  users:
-    nico:
-      - "5599432"
-      - "96462240"
+  nico:
+    - "130988811"

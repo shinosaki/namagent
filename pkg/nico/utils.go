@@ -1,15 +1,15 @@
-package recorder
+package nico
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/shinosaki/namagent/internal/recorder/types"
-	"github.com/shinosaki/namagent/utils"
+	"github.com/shinosaki/namagent/internal/utils"
 )
 
 func ExtractProgramId(input string) string {
@@ -21,19 +21,23 @@ func ExtractProgramId(input string) string {
 	return match[1]
 }
 
-func FetchProgramData(programId string, client *http.Client) (*types.ProgramData, error) {
+func FetchProgramData(programId string, client *http.Client) (*ProgramData, error) {
 	if client == nil {
 		client = utils.NewHttp2Client()
 	}
 
-	res, err := client.Get("https://live.nicovideo.jp/watch/" + programId)
+	url := "https://live.nicovideo.jp/watch/" + programId
+	log.Println("requesting url:", url)
+	res, err := client.Get(url)
 	if err != nil {
+		log.Println("http error of fetch program data:", err)
 		return nil, err
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Println("read body error of fetch program data", err)
 		return nil, err
 	}
 
@@ -43,9 +47,10 @@ func FetchProgramData(programId string, client *http.Client) (*types.ProgramData
 		return nil, fmt.Errorf("does not contain embedded-data in watch page")
 	}
 
-	var result types.ProgramData
+	var result ProgramData
 	data := strings.ReplaceAll(match[1], "&quot;", `"`)
 	if err := json.Unmarshal([]byte(data), &result); err != nil {
+		log.Println("failed to unmarshal program data:", err)
 		return nil, err
 	}
 
