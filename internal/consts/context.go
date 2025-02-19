@@ -7,4 +7,5 @@ const (
 	SIGNAL_CONTEXT utils.ContextKey = "SIGNAL_CONTEXT"
 	HTTP_CLIENT    utils.ContextKey = "HTTP_CLIENT"
 	CONFIG         utils.ContextKey = "CONFIG"
+	CONFIG_PATH    utils.ContextKey = "CONFIG_PATH"
 )

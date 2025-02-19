@@ -25,9 +25,10 @@ func main() {
 
 			// Set value to context
 			sc = sc.WithValue(consts.CONFIG, config)
-			ctx := context.WithValue(cmd.Context(), consts.SIGNAL_CONTEXT, sc)
+			sc = sc.WithValue(consts.CONFIG_PATH, configPath)
 
 			// Set sc to cobra's context
+			ctx := context.WithValue(cmd.Context(), consts.SIGNAL_CONTEXT, sc)
 			cmd.SetContext(ctx)
 
 			return nil

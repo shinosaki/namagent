@@ -47,7 +47,8 @@ func Alert(
 				defer sc.CancelTask(program.Id)
 
 				// nico.Client(program.Id, client, sc)
-				proc := exec.Command(os.Args[0], "recorder", program.Id)
+				configPath := sc.GetValue(consts.CONFIG_PATH).(string)
+				proc := exec.Command(os.Args[0], "recorder", program.Id, "--config", configPath)
 				utils.SetSID(proc)
 
 				if err := proc.Run(); err != nil {
