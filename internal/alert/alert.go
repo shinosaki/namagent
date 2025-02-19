@@ -43,12 +43,25 @@ func Alert(
 
 			log.Println("Alert: detected live stream for user id", userId, userName)
 			go func() {
-				sc.AddTask(program.Id, func() {})
+				var proc *exec.Cmd
+
+				sc.AddTask(program.Id, func() {
+					// CancelTaskされた場合
+					// exec.CommandしたRecorderにSIGINTを送信する
+					if proc != nil {
+						log.Println("Alert: send interrupt to recorder", program.Id)
+						if err := proc.Process.Signal(os.Interrupt); err != nil {
+							log.Println("Alert: send interrupt to recorder", program.Id, err)
+						}
+						if err := proc.Wait(); err != nil {
+							log.Println("Alert: terminated recorder process", program.Id, err)
+						}
+					}
+				})
 				defer sc.CancelTask(program.Id)
 
-				// nico.Client(program.Id, client, sc)
 				configPath := sc.GetValue(consts.CONFIG_PATH).(string)
-				proc := exec.Command(os.Args[0], "recorder", program.Id, "--config", configPath)
+				proc = exec.Command(os.Args[0], "recorder", program.Id, "--config", configPath)
 				utils.SetSID(proc)
 
 				if err := proc.Run(); err != nil {
@@ -78,7 +91,7 @@ func Alert(
 		select {
 		case <-sc.Context().Done():
 			log.Println("Alert: receive interrupt...")
-			// sc.Wait()
+			sc.CancelAllTasks()
 			return
 		case <-ticker.C:
 			fetchPrograms(false)

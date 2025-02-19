@@ -21,6 +21,7 @@ const (
 	STREAM         MessageType = "stream"
 	RECONNECT      MessageType = "reconnect"
 	MESSAGE_SERVER MessageType = "messageServer"
+	SCHEDULE       MessageType = "schedule"
 )
 
 type Request struct {
@@ -80,4 +81,9 @@ type Cookie struct {
 type MessageServerData struct {
 	ViewURI      string    `json:"viewUri"`
 	VposBaseTime time.Time `json:"vposBaseTime"`
+}
+
+type ScheduleData struct {
+	Begin time.Time `json:"begin"`
+	End   time.Time `json:"end"`
 }

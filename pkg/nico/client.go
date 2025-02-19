@@ -45,6 +45,8 @@ func Client(
 	go websocketHandler(sc, ws, client, messageChan, data)
 
 	ws.Wait()
+
+	sc.CancelAllTasks()
 	sc.Wait()
 
 	return nil
@@ -57,7 +59,10 @@ func websocketHandler(
 	messageChan chan nicowebsocket.Message,
 	programData *ProgramData,
 ) {
-	sc.AddTask("websocket", func() {})
+	sc.AddTask("websocket", func() {
+		log.Println("NicoClient: close websocket...")
+		ws.Disconnect()
+	})
 	defer sc.CancelTask("websocket")
 
 	config, _ := sc.GetValue(consts.CONFIG).(*utils.Config)
@@ -87,7 +92,7 @@ func websocketHandler(
 		select {
 		case <-sc.Context().Done():
 			log.Println("NicoClient: receive interrupt...")
-			ws.Disconnect()
+			// ws.Disconnect()
 			return
 			// ws.doneの処理が必要かも
 		case message, ok := <-messageChan:
@@ -131,14 +136,22 @@ func commentHandler(
 	sc *utils.SignalContext,
 	client *http.Client,
 ) {
-	sc.AddTask(url+at, func() {})
-	defer sc.CancelTask(url + at)
-
 	var (
 		mu              = &sync.Mutex{}
 		chatBuffer      []*data.Chat
 		alreadySegments = make(map[string]struct{})
 	)
+
+	sc.AddTask(url+at, func() {
+		log.Println("CommentHandler: receive cancel")
+		mu.Lock()
+		if err := utils.SaveToFile(chatBuffer, outputPath); err != nil {
+			log.Println(err)
+		}
+		mu.Unlock()
+		log.Println("CommentHandler: cancel done")
+	})
+	defer sc.CancelTask(url + at)
 
 	// Periodic write chat data to file
 	go func() {
@@ -148,11 +161,12 @@ func commentHandler(
 		for {
 			select {
 			case <-sc.Context().Done():
-				mu.Lock()
-				if err := utils.SaveToFile(chatBuffer, outputPath); err != nil {
-					log.Println(err)
-				}
-				mu.Unlock()
+				// mu.Lock()
+				// if err := utils.SaveToFile(chatBuffer, outputPath); err != nil {
+				// 	log.Println(err)
+				// }
+				// mu.Unlock()
+				sc.CancelTask(url + at)
 				return
 			case <-ticker.C:
 				mu.Lock()

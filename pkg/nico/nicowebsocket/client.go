@@ -83,6 +83,19 @@ func NewClient() (*Client, chan Message) {
 						}
 					}
 
+				case SCHEDULE:
+					var data ScheduleData
+					if err := json.Unmarshal(message.Data, &data); err != nil {
+						log.Println("Nico Websocket: unmarshal schedule data failed", err)
+						return
+					}
+
+					// End が現在時刻もしくは以前なら終了処理
+					if data.End.Before(time.Now()) || data.End.Equal(time.Now()) {
+						log.Println("Nico Websocket: received program has finished")
+						c.Disconnect()
+					}
+
 				case RECONNECT:
 					var data ReconnectData
 					if err := json.Unmarshal(message.Data, &data); err != nil {

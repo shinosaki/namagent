@@ -13,6 +13,7 @@ type ContextKey string
 type SignalContext struct {
 	wg     *sync.WaitGroup
 	tasks  *sync.Map
+	once   sync.Once
 	ctx    context.Context
 	cancel context.CancelFunc
 }
@@ -23,6 +24,7 @@ func NewSignalContext() *SignalContext {
 	sc := &SignalContext{
 		wg:     &sync.WaitGroup{},
 		tasks:  &sync.Map{},
+		once:   sync.Once{},
 		ctx:    ctx,
 		cancel: cancel,
 	}
@@ -61,6 +63,18 @@ func (c *SignalContext) CancelTask(id any) {
 		canceler.(context.CancelFunc)()
 		c.wg.Done()
 	}
+}
+
+func (c *SignalContext) CancelAllTasks() {
+	c.once.Do(func() {
+		c.tasks.Range(func(key, value any) bool {
+			canceler := value.(context.CancelFunc)
+			canceler()
+			c.tasks.Delete(key)
+			c.wg.Done()
+			return true
+		})
+	})
 }
 
 func (c *SignalContext) GetValue(key ContextKey) any {

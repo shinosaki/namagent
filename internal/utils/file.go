@@ -37,7 +37,19 @@ func SaveToFile[T any](data []T, path string) error {
 			}
 		}
 
-		data, err := json.Marshal(append(existsData, data...))
+		// marshalできないデータを弾く
+		var failedItems []T
+		for _, item := range data {
+			_, err := json.Marshal(item)
+			if err != nil {
+				log.Println("failed to marshal item:", err)
+				failedItems = append(failedItems, item)
+				continue
+			}
+			existsData = append(existsData, item)
+		}
+
+		result, err := json.Marshal(existsData)
 		if err != nil {
 			return err
 		}
@@ -45,8 +57,8 @@ func SaveToFile[T any](data []T, path string) error {
 		file.Seek(0, 0)  // seek to head
 		file.Truncate(0) // remove data
 
-		_, err = file.Write(data)
-		log.Printf("Write %d data to %s", len(data), path)
+		_, err = file.Write(result)
+		log.Printf("Write %d data to %s", len(existsData), path)
 
 		data = nil
 		return err
