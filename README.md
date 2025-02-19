@@ -2,6 +2,11 @@
 
 namagent is a cross-platform live streaming alert CLI application written in Golang.
 
+## Support Sites
+- live.nicovideo.jp: ニコニコ生放送
+  - 動画データの取得: WebSocketサーバから取得したHLSのURLとCookieデータを、ユーザが指定したコマンドに渡して起動します
+  - コメントデータの取得: MessageServerから取得したChatデータをJSON形式で保存します
+
 ## Download
 [Releases Page](https://github.com/shinosaki/namagent/releases)
 
