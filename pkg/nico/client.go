@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
@@ -73,6 +74,10 @@ func websocketHandler(
 	outputBasePath, err := filepath.Abs(outputBaseName)
 	if err != nil {
 		log.Panicln("failed to parse output_template", err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(outputBasePath), os.ModePerm); err != nil {
+		log.Panicln("failed to create output directory", err)
 	}
 
 	outputMediaPath := outputBasePath + ".ts"
