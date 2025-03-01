@@ -1,0 +1,22 @@
+alert:
+    check_interval_sec: 10
+auth:
+    nico:
+        user_session:
+following:
+    nico:
+        - 96254336
+recorder:
+    command_template:
+        - ffmpeg
+        - -cookies
+        - '{{formatCookies .Cookies "\n"}}'
+        - -i
+        - '{{.URL}}'
+        - -c
+        - copy
+        - -movflags
+        - faststart
+        - '{{.Output}}.{{.Extension}}'
+    extension: ts
+    output_template: '{{.AuthorId}}/{{.StartedAt.Format "20060102"}}-{{.ProgramId}}-{{printf "%.20s" .AuthorName}}-{{printf "%.50s" .ProgramTitle}}'
