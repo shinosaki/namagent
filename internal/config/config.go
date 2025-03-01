@@ -44,7 +44,7 @@ func LoadConfig(path string) (*Config, error) {
 	viper.SetConfigFile(path)
 
 	// Default values
-	viper.SetDefault("alert.check_interval_sec", 10)
+	viper.SetDefault("alert.check_interval", "10s")
 	viper.SetDefault("recorder.extension", "ts")
 	viper.SetDefault("recorder.output_template",
 		`{{.StartedAt.Format "20060102"}}-{{.ProgramId}}-{{printf "%.20s" .AuthorName}}-{{printf "%.50s" .ProgramTitle}}`,

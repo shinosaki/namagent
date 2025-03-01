@@ -1,22 +1,22 @@
 alert:
-    check_interval_sec: 10
+  check_interval: 10s
 auth:
-    nico:
-        user_session:
+  nico:
+    user_session:
 following:
-    nico:
-        - 96254336
+  nico:
+    - 96254336
 recorder:
-    command_template:
-        - ffmpeg
-        - -cookies
-        - '{{formatCookies .Cookies "\n"}}'
-        - -i
-        - '{{.URL}}'
-        - -c
-        - copy
-        - -movflags
-        - faststart
-        - '{{.Output}}.{{.Extension}}'
-    extension: ts
-    output_template: '{{.AuthorId}}/{{.StartedAt.Format "20060102"}}-{{.ProgramId}}-{{printf "%.20s" .AuthorName}}-{{printf "%.50s" .ProgramTitle}}'
+  command_template:
+    - ffmpeg
+    - -cookies
+    - '{{formatCookies .Cookies "\n"}}'
+    - -i
+    - "{{.URL}}"
+    - -c
+    - copy
+    - -movflags
+    - faststart
+    - "{{.Output}}.{{.Extension}}"
+  extension: ts
+  output_template: '{{.AuthorId}}/{{.StartedAt.Format "20060102"}}-{{.ProgramId}}-{{printf "%.20s" .AuthorName}}-{{printf "%.50s" .ProgramTitle}}'

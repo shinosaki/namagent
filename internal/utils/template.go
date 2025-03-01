@@ -9,7 +9,7 @@ import (
 )
 
 var funcs = template.FuncMap{
-	"formatCookies": FormatCookies,
+	"formatCookies": formatCookies,
 }
 
 func OutputTemplate(id string, tmpl string, params any) (string, error) {
@@ -37,7 +37,7 @@ func BulkOutputTemplate(id string, tmpls []string, params any) (results []string
 	return results, nil
 }
 
-func FormatCookies(cookies []*http.Cookie, separator string) string {
+func formatCookies(cookies []*http.Cookie, separator string) string {
 	var results []string
 	for _, c := range cookies {
 		results = append(results, fmt.Sprintf("%s=%s; domain=%s; path=%s",
