@@ -50,7 +50,6 @@ func Alert(
 		go func() {
 			defer wg.Done()
 			defer activeRecording.Delete(programId)
-			defer log.Println("recorder done")
 
 			activeRecording.Store(programId, struct{}{})
 
@@ -58,7 +57,6 @@ func Alert(
 			go func() {
 				<-ctx.Done()
 				recorderCancel()
-				log.Println("===recorderCancel() called")
 			}()
 
 			if err := recorder.Recorder(programId, config, recorderCtx, recorderCancel); err != nil {
